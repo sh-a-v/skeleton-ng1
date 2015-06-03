@@ -10,12 +10,14 @@
   {% for (var css in o.htmlWebpackPlugin.files.css) { %}
   <link href="{%=o.htmlWebpackPlugin.files.css[css]%}" rel="stylesheet">
   {% } %}
-
-  {% for (var chunk in o.htmlWebpackPlugin.files.chunks) { %}
-  <script src="{%=o.htmlWebpackPlugin.files.chunks[chunk].entry%}"></script>
-  {% } %}
 </head>
 <body>
   <section id="app-container" class="app-container"></section>
+
+  <section class="scripts">
+    {% for (var chunk in o.htmlWebpackPlugin.files.chunks) { %}
+    <script src="{%=o.htmlWebpackPlugin.files.chunks[chunk].entry%}"></script>
+    {% } %}
+  </section>
 </body>
 </html>

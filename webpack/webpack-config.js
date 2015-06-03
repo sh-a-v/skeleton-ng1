@@ -2,6 +2,7 @@ var path              = require('path');
 var webpack           = require('webpack');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
+var ngAnnotatePlugin  = require('ng-annotate-webpack-plugin');
 var cssnext           = require('cssnext');
 
 var serverConfig = require('../server/server-config');
@@ -32,6 +33,13 @@ var getEntry = function() {
     }
   }
 
+  entry.vendor = [
+    'angular',
+    'angular-ui-router',
+    'angular-resource',
+    'angular-touch'
+  ];
+
   return entry;
 };
 
@@ -48,7 +56,7 @@ var getPlugins = function() {
   chunks.forEach(function(chunk) {
     var htmlWebpackPlugin = new HtmlWebpackPlugin({
       template: './src/index.html',
-      chunks: ['commons', chunk],
+      chunks: ['vendor', chunk],
       filename: chunk + '.index.html'
     });
 
@@ -57,10 +65,7 @@ var getPlugins = function() {
 
   var extractTextPlugin  = new ExtractTextPlugin(getAssetName('css'));
   var dedupePlugin       = new webpack.optimize.DedupePlugin();
-  var commonsChunkPlugin = new webpack.optimize.CommonsChunkPlugin({
-    name: 'commons',
-    chunks: chunks
-  });
+  var commonsChunkPlugin = new webpack.optimize.CommonsChunkPlugin('vendor', 'vendor.build.js');
 
   plugins.push(
     extractTextPlugin,
@@ -74,9 +79,20 @@ var getPlugins = function() {
 
     plugins.push(hotModuleReplacementPlugin, noErrorsPlugin);
   } else {
-    var uglifyPlugin = new webpack.optimize.UglifyJsPlugin();
+    var ngPlugin     = new ngAnnotatePlugin({
+      add: true
+    });
 
-    plugins.push(uglifyPlugin);
+    var uglifyPlugin = new webpack.optimize.UglifyJsPlugin({
+      compress: {
+        warnings: false
+      }
+    });
+
+    plugins.push(
+      ngPlugin,
+      uglifyPlugin
+    );
   }
 
   return plugins;
